@@ -1,0 +1,24 @@
+              precision    recall  f1-score   support
+
+          -1       0.51      0.55      0.53       122
+           1       0.55      0.51      0.53       130
+
+    accuracy                           0.53       252
+   macro avg       0.53      0.53      0.53       252
+weighted avg       0.53      0.53      0.53       252
+
+best param:
+{'C': 4.641588833612778, 'gamma': 0.01}
+best score: 0.52
+              precision    recall  f1-score   support
+
+          -1       0.56      0.48      0.51       122
+           1       0.57      0.65      0.60       130
+
+    accuracy                           0.56       252
+   macro avg       0.56      0.56      0.56       252
+weighted avg       0.56      0.56      0.56       252
+
+best param:
+{'C': 10.0, 'gamma': 0.01}
+best score: 0.57
