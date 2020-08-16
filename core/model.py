@@ -66,21 +66,29 @@ class Hierarchy(object):
         return np.array(radius)
 
 
-def period2daily(X_p, datelist):
-    X = []
-    for i, x in enumerate(X_p):
-        for _ in datelist[i]:
-            X.append(x)
-    return np.array(X)
+def grid_search_hierarchy(data, n_class, taus):
+    scores = []
+    for tau in taus:
+        score = []
+        for n in n_class:
+            X = data.weekly(senticnet,tau)[0]
+            X = StandardScaler().fit_transform(X)
+            clster = Hierarchy(n, method='ward', criterion='maxclust').fit(X)
+            score.append(clster.silhouette_score_)
+        scores.append(score)
+    scores   = np.array(scores).T
+    best_tau = taus[np.argmax(score) % len(taus)]
+    best_n   = n_class[np.argmax(score) // len(taus)]
+    print('get best cluster parameters: tau = %d, n = %d' % (best_tau, best_n))
+    return best_tau, best_n
+    
 
-
-def rolling_fit_pred(clf, X, y, z, split=0.5, pre_n=None, z_enable=True, cvresult=True):
+def rolling_fit_pred(clf, X, y, z, split=0.5, pre_n=None, z_enable=True):
     '''
     z_enable is False, the X_ is composed by the final part of X which
     has the same length as the X_ when z_enable is True.
     '''
     result = []
-    cv_results = pd.DataFrame()
     # sample_num = []
     i_split = int(X.shape[0] * split)
     # X_ consist of pre_n training samples and 1 sample for prediction.
@@ -98,9 +106,7 @@ def rolling_fit_pred(clf, X, y, z, split=0.5, pre_n=None, z_enable=True, cvresul
         X_ = StandardScaler().fit_transform(X_)
         clf.fit(X_[:-1], y_[:-1])
         result.append(clf.predict([X_[-1]]))
-        cv_result = pd.DataFrame(clf.cv_results_)
-        cv_results = cv_results.append(cv_result[cv_result['rank_test_score']==1],
-                                       ignore_index=True)
+
     # print(sample_num)
     result = np.array(result).flatten()
-    return (result, cv_results) if cvresult else result
+    return result
