@@ -5,18 +5,36 @@
 Last Update: 2019-09-29
 """
 import os
+
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import StandardScaler
 from sklearn import svm
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, silhouette_score
 from sklearn.model_selection import GridSearchCV
+from sklearn.preprocessing import StandardScaler
 
-from core.model import Hierarchy, period2daily, rolling_fit_pred
 from core.dataloader import TimeSeries
+from core.model import Hierarchy, period2daily, rolling_fit_pred
 from transformer import senticnet
 
 np.random.seed(1)
+
+
+def grid_search_hierarchy(data, n_class, taus):
+    scores = []
+    for tau in taus:
+        score = []
+        for n in n_class:
+            X = data.weekly(senticnet,tau)[0]
+            X = StandardScaler().fit_transform(X)
+            clster = Hierarchy(n, method='ward', criterion='maxclust').fit(X)
+            score.append(clster.silhouette_score_)
+        scores.append(score)
+    scores   = np.array(scores).T
+    best_tau = taus[np.argmax(score) % len(taus)]
+    best_n   = n_class[np.argmax(score) // len(taus)]
+    print('get best cluster parameters: tau = %d, n = %d' % (best_tau, best_n))
+    return best_tau, best_n
 
 def main(stock):
     n = 3
