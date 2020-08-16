@@ -1,7 +1,8 @@
-/.DS_Store
+.DS_Store
 /.vscode
 /__pycache__
 data/processed
 data/raw
 data.old
 __pycache__
+test
