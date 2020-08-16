@@ -3,6 +3,6 @@
 /__pycache__
 data/processed
 data/raw
-data.old
+*.old
 __pycache__
 test
