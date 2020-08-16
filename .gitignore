@@ -1,5 +1,7 @@
 /.DS_Store
 /.vscode
 /__pycache__
-data
+data/processed
+data/raw
 data.old
+__pycache__
