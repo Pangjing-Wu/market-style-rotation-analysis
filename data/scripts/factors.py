@@ -47,7 +47,6 @@ def parse_args():
   parser = argparse.ArgumentParser(description= 'calculate technical indicators')
   parser.add_argument('-i', '--data_dir', required=True, type=str, help='direction of data file')
   parser.add_argument('-o', '--save_dir', required=True, type=str, help='direction of output file')
-  
   return parser.parse_args()
 
 
