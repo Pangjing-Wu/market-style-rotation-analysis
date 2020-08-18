@@ -24,21 +24,25 @@ def parse_args():
     parser.add_argument('-s', '--stock', required=True, type=str, help='stock id')
     parser.add_argument('-i', '--data_dir', required=True, type=str, help='direction of data file')
     parser.add_argument('-o', '--save_dir', required=True, type=str, help='direction of output file')
+    parser.add_argument('--lexicon', required=True, type=str, help='sentiment lexicion {SenticNet5|LMFinance}')
     parser.add_argument('--pre_n', default=250, type=int, help='use previous n days data as support set')
     parser.add_argument('--split', default=0.8, type=float, help='train test split')
     return parser.parse_args()
 
 
+# python -u main.py -s 0001.HK -i ./data/processed -o  ./results --lexicon LMFinance 
 if __name__ == '__main__':
     params = parse_args()
     np.random.seed(1)
     
-    XCOLS  = ['Date', 'pos', 'neu', 'neg', 'ple', 'att', 'sen',
+    XCOLS  = ['date', 'pos', 'neu', 'neg', 'ple', 'att', 'sen',
               'apt', 'Volume', 'ma10', 'ptc_chg', 'rsi12', 'macd', 'mfi']
     YCOL   = []
 
     # load data and periodization.
-    data    = pd.read_csv()
+    factor    = pd.read_csv(os.path.join(params.data_dir, 'factors', '%s.csv' % params.stock))
+    sentiment = pd.read_csv(os.path.join(params.data_dir, 'sentiments', params.lexicon, '%s.csv' % params.stock))
+    data    = pd.merge(factor, sentiment, on='date')
     data_p  = [p for p in weekly(data, tau)]
     date_p  = [dat.index.values.tolist() for dat in data_p]
     data_p  = [daily2period(p) for p in data_p]
