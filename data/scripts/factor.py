@@ -50,7 +50,7 @@ def parse_args():
   return parser.parse_args()
 
 
-if __name__ == '__main__':
+# python -u ./data/scripts/factor.py -i ./data/raw/price -o data/processed/factors
     params = parse_args()
 
     if os.path.isdir(params.data_dir):
@@ -58,18 +58,18 @@ if __name__ == '__main__':
     elif os.path.isfile(params.data_dir):
         csvlist = [params.data_dir]
     else:
-        raise KeyError('Unkonwn data direction.')
+        raise KeyError('unknown data direction')
 
     os.makedirs(params.save_dir, exist_ok=True)
 
     print('load data from %s, save to %s.' % (params.data_dir, params.save_dir))
 
     for i, csvfile in enumerate(csvlist):
-        data = pd.read_csv(csvfile)
-        data = calculate_factors(data)
-        data = data.dropna(axis=0)
+        price = pd.read_csv(csvfile)
+        data  = calculate_factors(price)
+        data  = data.dropna(axis=0)
         filename = os.path.basename(csvfile)
-        data.to_csv(os.path.join(params.save_dir, filename), index=False)
+        data.to_csv(os.path.join(params.save_dir, filename), index=False, float_format='%.5f')
         print('[%d/%d] %s was preprocessed.' % (i+1, len(csvlist), filename))
         
     print('All files have been preprocessed.')
