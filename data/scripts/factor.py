@@ -51,6 +51,7 @@ def parse_args():
 
 
 # python -u ./data/scripts/factor.py -i ./data/raw/price -o data/processed/factors
+if __name__ == '__main__':
     params = parse_args()
 
     if os.path.isdir(params.data_dir):
