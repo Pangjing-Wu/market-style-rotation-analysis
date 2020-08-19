@@ -15,8 +15,31 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import StandardScaler
 
 from core.generator import weekly
-from core.model import Hierarchy, grid_search_hierarchy, rolling_fit_pred
-from transformer import daily2period, period2daily
+from core.model import Hierarchy, rolling_fit_pred
+
+
+def repeat(values, likes):
+    ret = list()
+    for i, like in zip(values, likes):
+        ret += [i] * len(like)
+    return np.array(ret)
+
+
+def grid_search_hierarchy(features, taus, n_class, generator):
+    scores = list()
+    for tau in taus:
+        score = list()
+        X = np.array([x.mean().values for x in generator(features, tau)])
+        X = StandardScaler().fit_transform(X)
+        for n in n_class:
+            clster = Hierarchy(n, method='ward', criterion='maxclust').fit(X)
+            score.append(clster.silhouette_score_)
+        scores.append(score)
+    scores   = np.array(scores).T
+    best_tau = taus[np.argmax(score) % len(taus)]
+    best_n   = n_class[np.argmax(score) // len(taus)]
+    print('get best cluster parameters: tau = %d, n = %d, score = %.3f' % (best_tau, best_n, scores.max()))
+    return best_tau, best_n
 
 
 def parse_args():
@@ -35,55 +58,52 @@ if __name__ == '__main__':
     params = parse_args()
     np.random.seed(1)
     
-    XCOLS  = ['date', 'pos', 'neu', 'neg', 'ple', 'att', 'sen',
-              'apt', 'Volume', 'ma10', 'ptc_chg', 'rsi12', 'macd', 'mfi']
-    YCOL   = []
+    # load data.
+    YCOL      = ['pct_chg']
+    factor    = pd.read_csv(os.path.join(params.data_dir, 'factors', '%s.csv' % params.stock), index_col='date', parse_dates=True)
+    sentiment = pd.read_csv(os.path.join(params.data_dir, 'sentiments', params.lexicon, '%s.csv' % params.stock), index_col='date', parse_dates=True)
+    data      = pd.merge(factor, sentiment, left_index=True, right_index=True)
+    data      = data.drop(['open', 'high', 'low', 'adj close'], axis=1)
 
-    # load data and periodization.
-    factor    = pd.read_csv(os.path.join(params.data_dir, 'factors', '%s.csv' % params.stock))
-    sentiment = pd.read_csv(os.path.join(params.data_dir, 'sentiments', params.lexicon, '%s.csv' % params.stock))
-    data    = pd.merge(factor, sentiment, on='date')
-    data_p  = [p for p in weekly(data, tau)]
-    date_p  = [dat.index.values.tolist() for dat in data_p]
-    data_p  = [daily2period(p) for p in data_p]
+    # search best parameters of market styles.
+    tau, n  = grid_search_hierarchy(data, taus=np.arange(1,9), n_class=np.arange(2,10), generator=weekly)
+
+    # periodization.
+    data_p  = [p.mean() for p in weekly(data, tau)]
+    date_p  = [p.index for p in weekly(data, tau)]
     i_split = int(len(data_p) * params.split)
-
-    # spread features and label.
-    y_p = np.array([dat[YCOL] for dat in data_p])
-    X_p = np.array([dat[XCOLS] for dat in data_p])
+    X_p = np.array([x.values for x in data_p])
     X_p = StandardScaler().fit(X_p[:i_split]).transform(X_p)
-    
+
     # cluster.
-    taus    = np.arange(1,8)
-    n_class = np.arange(2,10)
-    n, tau  = grid_search_hierarchy(X_p, taus=taus, n_class=n_class)
     cluster = Hierarchy(n_clusters=n, method='ward', criterion='maxclust')
     style_p = cluster.fit(X_p[:i_split]).predict(X_p)
-    style   = period2daily(style_p, date_p)
+    style   = repeat(style_p, date_p)
     
     # classification.
-    X = data[XCOLS].values
-    y = np.where(data[YCOL] >= 0, 1, -1)
+    X = data.values
+    y = np.where(data[YCOL] >= 0, 1, -1).flatten()
 
     clf_parameters = {'C': np.logspace(0,3,10), 'gamma': np.logspace(-2,2,10)}
     clf = GridSearchCV(svm.SVC(kernel='rbf', class_weight='balanced'),
-                    clf_parameters, iid=True, cv=5, n_jobs=-1,
-                    scoring='f1_weighted', return_train_score=True)
+                       clf_parameters, cv=5, n_jobs=-1, scoring='f1_weighted')
 
     # train baseline.
-    y_pred = rolling_fit_pred(clf, X[:-1], y[1:], style[:-1],
-                             split=params.split, pre_n=params.pre_n, z_enable=False)
-    results = pd.DataFrame(index=X.index[-len(y_pred):])
+    y_pred, cv = rolling_fit_pred(clf, X[:-1], y[1:], style[:-1],
+                              split=params.split, pre_n=params.pre_n, z_enable=False)                        
+    results = pd.DataFrame(index=data.index[-len(y_pred):])
     results['baseline'] = y_pred
-    print('--- baseline results ---')
+    print('baseline results:')
+    print('validation: mean = %.5f, std = %.5f' % (np.mean(cv), np.std(cv)))
     print(classification_report(y[-len(y_pred):], y_pred), end='\n\n')
 
     # train our method.
-    y_pred = rolling_fit_pred(clf, X[:-1], y[1:], style[:-1],
+    y_pred, cv = rolling_fit_pred(clf, X[:-1], y[1:], style[:-1],
                              split=params.split, pre_n=params.pre_n, z_enable=True)
-    result['ours'] = y_pred
-    print('--- our method results ---')
+    results['ours'] = y_pred
+    print('our method results:')
+    print('validation: mean = %.5f, std = %.5f' % (np.mean(cv), np.std(cv)))
     print(classification_report(y[-len(y_pred):], y_pred), end='\n\n')
 
     # save all prediction labels.
-    result.to_csv(os.path.join(params.o, params.s+'.csv'))
+    results.to_csv(os.path.join(params.save_dir, params.stock+'.csv'))

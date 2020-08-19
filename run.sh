@@ -1,12 +1,12 @@
-python3 main.py 0001.HK >logs/0001.HK.log 2>&1
-python3 main.py 0012.HK >logs/0012.HK.log 2>&1
-python3 main.py 0016.HK >logs/0016.HK.log 2>&1
-python3 main.py 0002.HK >logs/0002.HK.log 2>&1
-python3 main.py 0003.HK >logs/0003.HK.log 2>&1
-python3 main.py 0006.HK >logs/0006.HK.log 2>&1
-python3 main.py 0005.HK >logs/0005.HK.log 2>&1
-python3 main.py 0011.HK >logs/0011.HK.log 2>&1
-python3 main.py 2388.HK >logs/2388.HK.log 2>&1
-python3 main.py 0013.HK >logs/0013.HK.log 2>&1
-python3 main.py 0762.HK >logs/0762.HK.log 2>&1
-python3 main.py 0941.HK >logs/0941.HK.log 2>&1
+python -u main.py -s 0001.HK -i ./data/processed -o ./results/LMFinance --lexicon LMFinance >results/LMFinance/0001.HK.log 2>&1
+python -u main.py -s 0012.HK -i ./data/processed -o ./results/LMFinance --lexicon LMFinance >results/LMFinance/0012.HK.log 2>&1
+python -u main.py -s 0016.HK -i ./data/processed -o ./results/LMFinance --lexicon LMFinance >results/LMFinance/0016.HK.log 2>&1
+python -u main.py -s 0002.HK -i ./data/processed -o ./results/LMFinance --lexicon LMFinance >results/LMFinance/0002.HK.log 2>&1
+python -u main.py -s 0003.HK -i ./data/processed -o ./results/LMFinance --lexicon LMFinance >results/LMFinance/0003.HK.log 2>&1
+python -u main.py -s 0006.HK -i ./data/processed -o ./results/LMFinance --lexicon LMFinance >results/LMFinance/0006.HK.log 2>&1
+python -u main.py -s 0005.HK -i ./data/processed -o ./results/LMFinance --lexicon LMFinance >results/LMFinance/0005.HK.log 2>&1
+python -u main.py -s 0011.HK -i ./data/processed -o ./results/LMFinance --lexicon LMFinance >results/LMFinance/0011.HK.log 2>&1
+python -u main.py -s 2388.HK -i ./data/processed -o ./results/LMFinance --lexicon LMFinance >results/LMFinance/2388.HK.log 2>&1
+python -u main.py -s 0013.HK -i ./data/processed -o ./results/LMFinance --lexicon LMFinance >results/LMFinance/0013.HK.log 2>&1
+python -u main.py -s 0762.HK -i ./data/processed -o ./results/LMFinance --lexicon LMFinance >results/LMFinance/0762.HK.log 2>&1
+python -u main.py -s 0941.HK -i ./data/processed -o ./results/LMFinance --lexicon LMFinance >results/LMFinance/0941.HK.log 2>&1
