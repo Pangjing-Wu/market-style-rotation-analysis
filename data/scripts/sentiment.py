@@ -64,11 +64,13 @@ class SenticNet5(SemtimentAnalysis):
 
     def __init__(self):
         super().__init__()
-        self.sentiment_labels = ['positive', 'negative']
+        self.sentiment_labels = ['polarity', 'pleasantness', 'attention',
+                                 'sensitivity', 'aptitude']
         self._max_phrase_len = 4
 
     def score(self, text:str):
-        scores = dict()
+        scores = dict(polarity=0, pleasantness=0, attention=0,
+                      sensitivity=0, aptitude=0)
         sentences = self._preprocess(text)
         for sentence in sentences:
             negative = False
@@ -82,18 +84,18 @@ class SenticNet5(SemtimentAnalysis):
                 except KeyError:
                     continue
                 for sentiment in self.sentiment_labels:
-                    polar = float(SenticNet().polarity_intense(word)) / len(sentence)
-                    score = float(sentics[sentiment])  / len(sentence)
-                    if sentiment in ['polarity']:
+                    if sentiment == 'polarity':
+                        polar = float(SenticNet().polarity_intense(word)) / len(sentence)
                         scores[sentiment] -= polar if negative else -polar
                     else:
+                        score = float(sentics[sentiment])  / len(sentence)
                         scores[sentiment] -= score if negative else -score
         return scores
 
     def _combine_phrase(self, words):
         i = 0
         while i < len(words):
-            phrase, l = query_phrase(words[i:])
+            phrase, l = self._query_phrase(words[i:])
             if l > 1:
                 words[i] = phrase
                 words = words[:i+1] + words[i+l:]
@@ -120,7 +122,7 @@ class LMFinance(SemtimentAnalysis):
     def __init__(self, filepath:str):
         super().__init__()
         self.sentiment_labels = ['positive', 'negative', 'uncertainty', 'litigious',
-                                  'weakmodal', 'strongmodal', 'constraining']
+                                 'weakmodal', 'strongmodal', 'constraining']
         self._lexicon = dict()
         for sentiment in self.sentiment_labels:
             f = open(os.path.join(filepath, sentiment+'.txt'))
@@ -148,12 +150,12 @@ def parse_args():
     parser = argparse.ArgumentParser(description= 'batch calculate news sentiments')
     parser.add_argument('-i', '--data_dir', required=True, type=str, help='direction of data file')
     parser.add_argument('-o', '--save_dir', required=True, type=str, help='direction of output file')
-    parser.add_argument('--lexicon', required=True, type=str, help='sentiment lexicion {senticnet5|lmfinance}')
+    parser.add_argument('--lexicon', required=True, type=str, help='sentiment lexicion {SenticNet5|LMFinance}')
     parser.add_argument('--lexicon_dir', type=str, help='lexicion file direction')
     return parser.parse_args()
 
 
-# python -u ./data/scripts/sentiment.py -i ./data/raw/news -o ./data/processed/sentiments/LMFinance --lexicon lmfinance --lexicon_dir ./data/lexicon/LMFinance
+# python -u ./data/scripts/sentiment.py -i ./data/raw/news -o ./data/processed/sentiments/LMFinance --lexicon SenticNet5 --lexicon_dir ./data/lexicon/LMFinance
 if __name__ == "__main__":
     params = parse_args()
 
@@ -168,9 +170,9 @@ if __name__ == "__main__":
 
     print('load data from %s, save to %s.' % (params.data_dir, params.save_dir))
 
-    if params.lexicon == 'senticnet5':
+    if params.lexicon == 'SenticNet5':
         lexicon = SenticNet5()
-    elif params.lexicon == 'lmfinance':
+    elif params.lexicon == 'LMFinance':
         lexicon = LMFinance(params.lexicon_dir)
     else:
         raise KeyError("unknown sentiment lexicon")
