@@ -6,3 +6,4 @@ data/raw
 *.old
 __pycache__
 test
+results

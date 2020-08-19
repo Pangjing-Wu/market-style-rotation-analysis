@@ -10,9 +10,6 @@ import pandas as pd
 
 
 def daily(data:pd.DataFrame, period:int, time_col=None):
-    if type(period) != int:
-        raise TypeError("argument period type must be int")
-
     index = data[time_col] if time_col else data.index
     i = 0
     while i < len(data):
@@ -24,8 +21,6 @@ def daily(data:pd.DataFrame, period:int, time_col=None):
 
 
 def weekly(data:pd.DataFrame, period:int, time_col=None):
-    if type(period) != int:
-        raise TypeError("argument period type must be int")
     if period > 11 or period < 1:
         raise ValueError("period value must be in range of (1, 51).")
     
@@ -42,8 +37,6 @@ def weekly(data:pd.DataFrame, period:int, time_col=None):
 
 
 def monthly(data:pd.DataFrame, period:int, time_col=None):
-    if type(period) != int:
-        raise TypeError("argument period type must be int")
     if period > 11 or period < 1:
         raise ValueError("period value must be in range of (1, 11).")
     
