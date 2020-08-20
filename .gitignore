@@ -3,7 +3,7 @@
 /__pycache__
 data/processed
 data/raw
-*.old
+old
 __pycache__
 test
 results
