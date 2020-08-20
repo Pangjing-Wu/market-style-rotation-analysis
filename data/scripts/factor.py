@@ -6,7 +6,7 @@ import pandas as pd
 import talib as ta
 
 
-def calculate_factors(data, inplace=False):
+def calculate_indicators(data, inplace=False):
     df = data.copy() if inplace == False else data
 
     # overlap studies
@@ -50,7 +50,7 @@ def parse_args():
   return parser.parse_args()
 
 
-# python -u ./data/scripts/factor.py -i ./data/raw/price -o data/processed/factors
+# python -u ./data/scripts/indicator.py -i ./data/raw/price -o data/processed/indicators
 if __name__ == '__main__':
     params = parse_args()
 
@@ -67,7 +67,7 @@ if __name__ == '__main__':
 
     for i, csvfile in enumerate(csvlist):
         price = pd.read_csv(csvfile)
-        data  = calculate_factors(price)
+        data  = calculate_indicators(price)
         data  = data.dropna(axis=0)
         filename = os.path.basename(csvfile)
         data.to_csv(os.path.join(params.save_dir, filename), index=False, float_format='%.5f')

@@ -60,9 +60,9 @@ if __name__ == '__main__':
     
     # load data.
     YCOL      = ['pct_chg']
-    factor    = pd.read_csv(os.path.join(params.data_dir, 'factors', '%s.csv' % params.stock), index_col='date', parse_dates=True)
+    indicator    = pd.read_csv(os.path.join(params.data_dir, 'indicators', '%s.csv' % params.stock), index_col='date', parse_dates=True)
     sentiment = pd.read_csv(os.path.join(params.data_dir, 'sentiments', params.lexicon, '%s.csv' % params.stock), index_col='date', parse_dates=True)
-    data      = pd.merge(factor, sentiment, left_index=True, right_index=True)
+    data      = pd.merge(indicator, sentiment, left_index=True, right_index=True)
     data      = data.drop(['open', 'high', 'low', 'adj close'], axis=1)
 
     # search best parameters of market styles.
