@@ -60,10 +60,11 @@ if __name__ == '__main__':
     
     # load data.
     YCOL      = ['pct_chg']
-    indicator    = pd.read_csv(os.path.join(params.data_dir, 'indicators', '%s.csv' % params.stock), index_col='date', parse_dates=True)
+    indicator = pd.read_csv(os.path.join(params.data_dir, 'indicators', '%s.csv' % params.stock), index_col='date', parse_dates=True)
     sentiment = pd.read_csv(os.path.join(params.data_dir, 'sentiments', params.lexicon, '%s.csv' % params.stock), index_col='date', parse_dates=True)
-    data      = pd.merge(indicator, sentiment, left_index=True, right_index=True)
+    data      = pd.merge(indicator, sentiment, how='left', left_index=True, right_index=True)
     data      = data.drop(['open', 'high', 'low', 'adj close'], axis=1)
+    data      = data.fillna(0)
 
     # search best parameters of market styles.
     tau, n  = grid_search_hierarchy(data, taus=np.arange(1,9), n_class=np.arange(2,10), generator=weekly)
