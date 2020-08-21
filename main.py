@@ -92,7 +92,7 @@ if __name__ == '__main__':
     # train baseline.
     y_pred, cv = rolling_fit_pred(clf, X[:-1], y[1:], style[:-1],
                               split=params.split, pre_n=params.pre_n, z_enable=False)                        
-    results = pd.DataFrame(index=data.index[-len(y_pred):])
+    results = pd.DataFrame(y[-len(y_pred):], columns=['true'], index=data.index[-len(y_pred):])
     results['baseline'] = y_pred
     print('baseline results:')
     print('validation: mean = %.5f, std = %.5f' % (np.mean(cv), np.std(cv)))
