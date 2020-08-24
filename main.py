@@ -20,8 +20,8 @@ from core.model import Hierarchy, rolling_fit_pred
 
 def repeat(values, likes):
     ret = list()
-    for i, like in zip(values, likes):
-        ret += [i] * len(like)
+    for i, obj in zip(values, likes):
+        ret += [i] * len(obj)
     return np.array(ret)
 
 
