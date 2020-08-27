@@ -36,8 +36,8 @@ def grid_search_hierarchy(features, taus, n_class, generator):
             score.append(clster.silhouette_score_)
         scores.append(score)
     scores   = np.array(scores).T
-    best_tau = taus[np.argmax(score) % len(taus)]
-    best_n   = n_class[np.argmax(score) // len(taus)]
+    best_tau = taus[np.argmax(scores) % len(taus)]
+    best_n   = n_class[np.argmax(scores) // len(taus)]
     print('get best cluster parameters: tau = %d, n = %d, score = %.3f' % (best_tau, best_n, scores.max()))
     return best_tau, best_n
 
@@ -67,7 +67,7 @@ if __name__ == '__main__':
     data      = data.fillna(0)
 
     # search best parameters of market styles.
-    tau, n  = grid_search_hierarchy(data, taus=np.arange(1,9), n_class=np.arange(2,10), generator=weekly)
+    tau, n  = grid_search_hierarchy(data, taus=np.arange(1,8), n_class=np.arange(2,10), generator=weekly)
 
     # periodization.
     data_p  = [p.mean() for p in weekly(data, tau)]
